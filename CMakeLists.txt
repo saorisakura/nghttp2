@@ -537,3 +537,5 @@ if(ENABLE_LIB_ONLY_DISABLED_OTHERS)
   message("Only the library will be built. To build other components "
     "(such as applications and examples), set ENABLE_LIB_ONLY=OFF.")
 endif()
+
+add_subdirectory(myserver)
