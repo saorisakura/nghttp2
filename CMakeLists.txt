@@ -187,6 +187,37 @@ add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 
 # openssl (for src)
 include(CheckSymbolExists)
+# 要使用 `include(CheckSymbolExists)` 检查特定的函数是否存在，你需要在你的 CMakeLists.txt 文件中执行以下步骤：
+#
+#1. 首先，使用 `include(CheckSymbolExists)` 指令包含 CMake 的 CheckSymbolExists 模块。
+#
+#2. 然后，使用 `check_symbol_exists()` 函数来检查特定的函数是否存在。这个函数接受三个参数：要检查的函数名、包含该函数的头文件、以及一个变量名来存储检查结果。
+#
+#3. 接着，你可以根据检查结果来设置条件编译或其他构建选项。
+#
+#下面是一个简单的示例，演示如何检查 `sqrt()` 函数是否存在：
+#
+#```cmake
+#cmake_minimum_required(VERSION 3.0)
+#project(CheckSymbolExistsExample)
+#
+## 包含 CheckSymbolExists 模块
+#include(CheckSymbolExists)
+#
+## 检查 sqrt() 函数是否存在
+#check_symbol_exists(sqrt "math.h" HAVE_SQRT)
+#
+#if (HAVE_SQRT)
+#    message("sqrt() 函数存在")
+#    add_definitions(-DHAS_SQRT)  # 根据检查结果设置宏定义
+#else()
+#    message("sqrt() 函数不存在")
+#endif()
+#```
+#
+#在这个示例中，`check_symbol_exists(sqrt "math.h" HAVE_SQRT)` 检查 `math.h` 头文件中是否包含 `sqrt()` 函数，并将结果存储在 `HAVE_SQRT` 变量中。根据检查结果，你可以执行不同的操作，比如添加宏定义或输出消息。
+#
+#记得在你的项目中适当地使用这些检查来确保你的代码在不同的环境中能够正确编译和运行。
 set(HAVE_OPENSSL    ${OPENSSL_FOUND})
 if(NOT ENABLE_LIB_ONLY AND OPENSSL_FOUND)
   set(OPENSSL_INCLUDE_DIRS  ${OPENSSL_INCLUDE_DIR})
