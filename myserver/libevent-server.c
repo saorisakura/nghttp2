@@ -280,6 +280,32 @@ static int session_send(http2_session_data *session_data) {
    function. Invocation of nghttp2_session_mem_recv2() may make
    additional pending frames, so call session_send() at the end of the
    function. */
+/*
+*这段代码看起来是一个函数，用于处理HTTP/2会话数据的接收过程。让我来逐步解读这段代码：
+
+1. `static int session_recv(http2_session_data *session_data) {`：这是一个静态函数，接受一个指向`http2_session_data`类型的结构体指针作为参数。
+
+2. `nghttp2_ssize readlen;`：声明一个`nghttp2_ssize`类型的变量`readlen`，用于存储从会话中接收到的数据长度。
+
+3. `struct evbuffer *input = bufferevent_get_input(session_data->bev);`：从`session_data`结构体中获取`bufferevent`的输入缓冲区，并将其赋值给`input`。
+
+4. `size_t datalen = evbuffer_get_length(input);`：获取输入缓冲区`input`中的数据长度，并将其存储在`datalen`变量中。
+
+5. `unsigned char *data = evbuffer_pullup(input, -1);`：将输入缓冲区`input`中的数据提取出来，并存储在`data`指针中。
+
+6. `readlen = nghttp2_session_mem_recv2(session_data->session, data, datalen);`：调用`nghttp2_session_mem_recv2`函数，将提取出的数据`data`和数据长度`datalen`传递给该函数，并将返回的结果存储在`readlen`中。
+
+7. `if (readlen < 0) { ... }`：如果接收数据的长度小于0，表示出现错误，输出错误信息并返回-1。
+
+8. `if (evbuffer_drain(input, (size_t)readlen) != 0) { ... }`：从输入缓冲区`input`中移除已经处理的数据长度`readlen`，如果移除失败，则输出错误信息并返回-1。
+
+9. `if (session_send(session_data) != 0) { ... }`：调用`session_send`函数发送数据，如果发送数据失败，则返回-1。
+
+10. `return 0;`：如果以上步骤都执行成功，则返回0，表示函数执行成功。
+
+这段代码的主要功能是接收HTTP/2会话数据，通过`nghttp2_session_mem_recv2`函数处理接收到的数据，然后从输入缓冲区中移除已处理的数据，最后调用`session_send`函数发送数据。
+ *
+ */
 static int session_recv(http2_session_data *session_data) {
   nghttp2_ssize readlen;
   struct evbuffer *input = bufferevent_get_input(session_data->bev);
@@ -707,6 +733,7 @@ static void eventcb(struct bufferevent *bev, short events, void *ptr) {
 static void acceptcb(struct evconnlistener *listener, int fd,
                      struct sockaddr *addr, int addrlen, void *arg) {
   app_context *app_ctx = (app_context *)arg;
+  // http2_session_data是自定义的结构，里面包含了客户端连接的fd，地址和libevent需要的eventbuffer用于读写数据
   http2_session_data *session_data;
   (void)listener;
 

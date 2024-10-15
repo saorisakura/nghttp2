@@ -86,7 +86,7 @@ link_libraries(
 #  ${APP_LIBRARIES}
 )
 include_directories(/usr/local/include)
-include_directories(/usr/local/include/event2)
+include_directories(../third-party)
 
 
 # 在CMakeLists.txt文件中，`$<TARGET_OBJECTS:XXX>`是CMake的生成器表达式(generator expression)之一，用于将指定目标（target）中的对象文件（object files）添加到另一个目标中。这在构建项目时可以很有用，因为它允许将一个目标（target）中的编译对象（object files）直接包含到另一个目标中，而无需重复编译。
@@ -105,17 +105,17 @@ include_directories(/usr/local/include/event2)
 #在你的例子中，假设有名为`llhttp`和`url-parser`的目标，通过`$<TARGET_OBJECTS:llhttp>`和`$<TARGET_OBJECTS:url-parser>`表达式，将这些目标生成的对象文件包含到`client`可执行文件的构建中。
 
 # apt install libssl-dev libcrypto++-dev
-add_executable(client           client.c $<TARGET_OBJECTS:llhttp>
-  $<TARGET_OBJECTS:url-parser>
-)
-add_executable(libevent-client  libevent-client.c $<TARGET_OBJECTS:llhttp>
-  $<TARGET_OBJECTS:url-parser>
-)
+#add_executable(my-client           client.c $<TARGET_OBJECTS:llhttp>
+#  $<TARGET_OBJECTS:url-parser>
+#)
+#add_executable(my-libevent-client  libevent-client.c $<TARGET_OBJECTS:llhttp>
+#  $<TARGET_OBJECTS:url-parser>
+#)
 #add_executable(libevent-server  libevent-server.c $<TARGET_OBJECTS:llhttp>
 #  $<TARGET_OBJECTS:url-parser>
 #)
-add_executable(libevent-server  libevent-server.c)
-target_link_libraries(libevent-server PUBLIC event)
+add_executable(my-libevent-server  libevent-server.c)
+target_link_libraries(my-libevent-server PUBLIC event)
 # The error "undefined reference to `bufferevent_openssl_socket_new'" typically occurs when the linker is unable to find the definition of the function `bufferevent_openssl_socket_new`.
 #
 #To resolve this issue, you need to ensure that you are linking against the correct library that contains the definition of `bufferevent_openssl_socket_new`. In this case, it seems like you are using libevent with OpenSSL.
@@ -131,15 +131,30 @@ target_link_libraries(libevent-server PUBLIC event)
 #Make sure that the paths to the libraries are correctly set in case they are not in the default library path.
 #
 #After making these changes, try compiling your program again. This should resolve the "undefined reference" error related to `bufferevent_openssl_socket_new`.
-target_link_libraries(libevent-server PUBLIC event_openssl)
+target_link_libraries(my-libevent-server PUBLIC event_openssl)
 #target_link_libraries(libevent-server PUBLIC nghttp2)
-target_link_libraries(libevent-server PUBLIC ssl)
+target_link_libraries(my-libevent-server PUBLIC ssl)
 # /usr/local/lib/libcrypto.so.1.1: error adding symbols: DSO missing from command line
-target_link_libraries(libevent-server PUBLIC crypto)
+target_link_libraries(my-libevent-server PUBLIC crypto)
 # /data/code_src/nghttp2/cmake-build-debug/myserver/libevent-server: error while loading shared libraries: libcrypto.so.1.1: cannot open shared object file: No such file or directory
 # ln -s /usr/lib/x86_64-linux-gnu/libssl.so.3 /usr/lib/libssl.so.1.1
 # ln -s /usr/lib/x86_64-linux-gnu/libcrypto.so.3 /usr/lib/libcrypto.so.1.1
 # openssl 1.1.0 installation https://www.openssl.org/source/openssl-1.1.0.tar.gz
-add_executable(deflate          deflate.c $<TARGET_OBJECTS:llhttp>
+
+add_executable(my-libevent-client  libevent-client.c)
+target_link_libraries(my-libevent-client PUBLIC event)
+target_link_libraries(my-libevent-client PUBLIC event_openssl)
+target_link_libraries(my-libevent-client PUBLIC ssl)
+target_link_libraries(my-libevent-client PUBLIC crypto)
+target_link_libraries(my-libevent-client PUBLIC llhttp)
+
+add_executable(my-client  client.c)
+target_link_libraries(my-client PUBLIC event)
+target_link_libraries(my-client PUBLIC event_openssl)
+target_link_libraries(my-client PUBLIC ssl)
+target_link_libraries(my-client PUBLIC crypto)
+target_link_libraries(my-client PUBLIC llhttp)
+
+add_executable(my-deflate          deflate.c $<TARGET_OBJECTS:llhttp>
   $<TARGET_OBJECTS:url-parser>
 )
